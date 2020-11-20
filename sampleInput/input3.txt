@@ -1,9 +1,0 @@
-global 
-	awe :=0 ;
-	bwe :=0 ;
-	if awe <> qwe :
-		print "# 123QWE"
-	else
-		print "ABC"
-	end 
-end

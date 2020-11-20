@@ -1,12 +1,28 @@
 %{
 	#include<stdio.h> 
+	#include "lex.yy.c"
 	int error=1; 
 	void yyerror(const char *str);
+	int nd=0;
+	typedef struct cls
+	{	int node;
+		char *code;
+	} clss;
 %}
 
 
-%token AND ASSIGN COLON COMMA DEF DIV DOT ELSE END EQ EXITLOOP FLOAT FLOAT_CONST FORMAT FROM FUN GE GLOBAL GT ID IF INT INT_CONST LEFT_PAREN LEFT_SQ_BKT LE LT MINUS MOD MULT NE NOT NUL OR PLUS PRINT PRODUCT READ RETURN RETURNS RIGHT_PAREN RIGHT_SQ_BKT SEMICOLON SKIP STEP STRING TO WHILE 
+%token AND ASSIGN COLON COMMA DEF DIV DOT ELSE END EQ EXITLOOP FLOAT  FORMAT FROM FUN GE GLOBAL GT IF INT  LEFT_PAREN LEFT_SQ_BKT LE LT MINUS MOD MULT NE NOT NUL OR PLUS PRINT PRODUCT READ RETURN RETURNS RIGHT_PAREN RIGHT_SQ_BKT SEMICOLON SKIP STEP  TO WHILE 
 
+%union {char * var;
+		char * str;
+		int int_const;
+		float float_const; 
+		clss * ptr;
+		}   
+%token<var> ID
+%token<str> STRING
+%token<int_const> INT_CONST		
+%token<float_const> FLOAT_CONST
 
 %left PLUS MINUS
 %left MULT DIV MOD
@@ -109,8 +125,7 @@ actParamListO: actParamList   | ;
 actParamList: actParamList COMMA exp | exp;
 
 %% 
-
-#include "lex.yy.c" 
+ 
 extern int yylex();
 extern int yyparse();
 extern int line_num;
