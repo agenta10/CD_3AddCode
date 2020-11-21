@@ -31,7 +31,7 @@ global {return GLOBAL;}
 
 if {return IF;}
 int {return INT;}
-[0-9]+ {return INT_CONST;}
+[0-9]+ {yylval.ptr=createnode(funadd1(yytext),0,0);return INT_CONST;}
 [(] {return LEFT_PAREN;}
 \[ {return LEFT_SQ_BKT;}
 [<][=] {return LE;}
@@ -57,7 +57,7 @@ step {return STEP;}
 to {return TO;}
 while {return WHILE;}
 \".*\" {return STRING;}
-[a-zA-Z][a-zA-Z0-9]+ {return ID;}
+[a-zA-Z][a-zA-Z0-9]+ {yylval.ptr=createnode(funadd1(yytext),0,0);return ID;}
 
 [\t\n" "] {}; 
 

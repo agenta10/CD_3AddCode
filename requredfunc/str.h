@@ -1,5 +1,11 @@
 #include<stdio.h>
 #include<stdlib.h>
+typedef struct cls
+	{	int st_ln;
+		int no_ln;
+		char * evar;
+		char *code;
+	} clss;
 char * funadd2(char b[],char c[])
 	{	int i,sz1=0,sz2=0;
 		for(i=0;b[i]!='\0';i++)
@@ -30,6 +36,11 @@ char * funadd4(char *a,char * b,char *c,char *d)
 		e=funadd2(e,d);
 		return e;
 	}
+char * funadd5(char *a,char * b,char *c,char *d,char *e)
+	{	char *f=funadd4(a,b,c,d);
+		f=funadd2(f,e);
+		return f;
+	}
 char * funadd1(char b[])
 	{	int i,sz=0;
 		for(i=0;b[i]!='\0';i++)
@@ -53,3 +64,10 @@ char * fl_tos(float num)
 		sprintf(d, "%f", num);
 		return d;	
 	}
+clss * createnode(char *a,int st,int nl)
+		{	clss *x=(clss *)malloc(sizeof(clss));
+			x->st_ln=st;
+			x->no_ln=nl;
+			x->code=a;
+			return x;
+		}

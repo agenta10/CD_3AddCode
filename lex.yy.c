@@ -950,7 +950,7 @@ YY_RULE_SETUP
 case 23:
 YY_RULE_SETUP
 #line 34 "sol.lex"
-{return INT_CONST;}
+{yylval.ptr=createnode(funadd1(yytext),0,0);return INT_CONST;}
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
@@ -1080,7 +1080,7 @@ YY_RULE_SETUP
 case 49:
 YY_RULE_SETUP
 #line 60 "sol.lex"
-{return ID;}
+{yylval.ptr=createnode(funadd1(yytext),0,0);return ID;}
 	YY_BREAK
 case 50:
 /* rule 50 can match eol */

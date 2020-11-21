@@ -1,12 +1,16 @@
 %{
 	#include<stdio.h> 
+	#include<stdlib.h>
+	#include "requredfunc/str.h"
 	int error=1; 
+	int nd=0;
 	void yyerror(const char *str);
 %}
-
+%union{clss *ptr;}
 
 %token AND ASSIGN COLON COMMA DEF DIV DOT ELSE END EQ EXITLOOP FLOAT FLOAT_CONST FORMAT FROM FUN GE GLOBAL GT ID IF INT INT_CONST LEFT_PAREN LEFT_SQ_BKT LE LT MINUS MOD MULT NE NOT NUL OR PLUS PRINT PRODUCT READ RETURN RETURNS RIGHT_PAREN RIGHT_SQ_BKT SEMICOLON SKIP STEP STRING TO WHILE 
 
+%type <ptr> exp id assignmentStmt dotId stmt stmtList stmtList0
 
 %left PLUS MINUS
 %left MULT DIV MOD
@@ -18,9 +22,7 @@
 
 %% 
 
-prog : GLOBAL declList stmtListO END 
-{printf("Parsed  Successfull...\nCode is valid....\n\n"); 
-	return 0; } ;
+prog : GLOBAL declList stmtListO END  ;
 
 declList: decl declList 
 			{	printf("hi declist");
@@ -56,21 +58,64 @@ idP: ID sizeListO;
 
 funBody: declList stmtListO;
 
-stmtListO: stmtList|  ;
+stmtListO: stmtList
+		{	printf("%s",$1->code);
+		}	|  ;
 
-stmtList: stmtList SEMICOLON stmt | stmt;
+stmtList: stmtList SEMICOLON stmt 
+		{	char * code=funadd3($1->code,"\n",$3->code);
+			$$=createnode(code, $1->st_ln, $1->no_ln+$3->no_ln);
+		}		
+		| stmt
+		{	$$=$1;
+		};
 
-stmt: assignmentStmt |readStmt |printStmt |ifStmt |whileStmt |loopStmt |callStmt |returnStmt |exitLoop |skip;
+stmt: assignmentStmt
+	{	$$=$1;
+	} 
+|readStmt |printStmt |ifStmt 
+	{	$$=$1;
+	}
+|whileStmt |loopStmt |callStmt |returnStmt |exitLoop |skip;
 
-assignmentStmt: dotId ASSIGN exp;
+assignmentStmt: dotId ASSIGN exp
+{	char *code;
+	printf("%d",nd);
+	if($$->st_ln!=0)
+	{	code=funadd5($3->code,"\n",in_tos(nd+$3->st_ln+$3->no_ln)," ",$1->code);
+		code=funadd3(code," = ",$3->evar);
+	}
+	else
+	{	code=funadd5(in_tos(nd+$3->st_ln+$3->no_ln+1)," ",$1->code," = ",$3->evar);
+	}
+	$$=createnode(code,1,1+$3->no_ln);
+	nd+=($3->no_ln+1);
+};
 
-dotId: id |id DOT dotId ;
+dotId: id 
+	{	$$ = $1;
+	}
+	|id DOT dotId ;
 
 readStmt: READ FORMAT exp ;
 
 printStmt: PRINT STRING |PRINT FORMAT exp ;
 
-ifStmt: IF bExp COLON stmtList elsePart END ;
+ifStmt: IF bExp COLON stmtList elsePart END 
+	{	char *code;
+	varc++;
+	if($3->st_ln!=0 && $1-st_ln!=0)	
+	{	code=funadd5($1->code,"\n",$3->code,"\n",in_tos(nd+$3->st_ln+$3->no_ln + $1->st_ln+$1->no_ln-1));
+		code=funadd5(code,"var",in_tos(varc),$1->evar," <> ");
+		code=funadd2(code,$3->evar);
+	}
+	else if($3->st_ln==0 && $3->st_ln==0)
+	{	code=funadd5(in_to(nd+1),"var",in_tos(varc),$1->evar," <> ");
+		code=funadd2(code,$3->evar);
+	}
+	$$=createnode(code,1,1+$3->no_ln);
+	nd+=$3->st_ln+$3->no_ln;
+	};
 
 elsePart: ELSE stmtList|  ;
 
@@ -90,19 +135,33 @@ exitLoop: EXITLOOP ;
 
 skip: SKIP ;
 
-id: ID indxListO ;
+id: ID indxListO 
+	{	$$=yylval.ptr;
+	};
 
 indxListO: indxList | ;
 
 indxList: indxList LEFT_SQ_BKT exp RIGHT_SQ_BKT | LEFT_SQ_BKT exp RIGHT_SQ_BKT;
 
-bExp: bExp OR bExp  | bExp AND bExp  | NOT bExp  | LEFT_PAREN bExp RIGHT_PAREN | exp relOP exp;
+bExp: bExp OR bExp  | bExp AND bExp  | NOT bExp  | LEFT_PAREN bExp RIGHT_PAREN | exp relOP exp
+{	
+}
+;
 
 relOP: EQ |LE |LT |GE |GT |NE ;
 
 exp: exp PLUS exp | exp MINUS exp | exp MULT exp | exp DIV exp | 
 exp MOD exp | MINUS exp | PLUS exp | exp DOT exp | LEFT_PAREN exp RIGHT_PAREN 
-| id | LEFT_PAREN ID COLON actParamListO RIGHT_PAREN | INT_CONST | FLOAT_CONST ;
+| id | LEFT_PAREN ID COLON actParamListO RIGHT_PAREN | 
+INT_CONST
+{	//printf("%s",yylval.ptr->code);
+	$$ = yylval.ptr;
+	$$->evar=$$->code;
+} 
+| FLOAT_CONST
+{	$$ = yylval.ptr;
+	$$->evar=$$->code;
+} ;
 
 actParamListO: actParamList   | ;
 

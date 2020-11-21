@@ -65,10 +65,13 @@
 #line 1 "sol.y" /* yacc.c:339  */
 
 	#include<stdio.h> 
+	#include<stdlib.h>
+	#include "requredfunc/str.h"
 	int error=1; 
+	int nd=0;
 	void yyerror(const char *str);
 
-#line 72 "y.tab.c" /* yacc.c:339  */
+#line 75 "y.tab.c" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -209,7 +212,16 @@ extern int yydebug;
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef int YYSTYPE;
+
+union YYSTYPE
+{
+#line 9 "sol.y" /* yacc.c:355  */
+clss *ptr;
+
+#line 222 "y.tab.c" /* yacc.c:355  */
+};
+
+typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
 #endif
@@ -223,7 +235,7 @@ int yyparse (void);
 
 /* Copy the second part of user declarations.  */
 
-#line 227 "y.tab.c" /* yacc.c:358  */
+#line 239 "y.tab.c" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -525,16 +537,16 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    21,    21,    25,    28,    30,    30,    32,    32,    32,
-      34,    34,    36,    38,    38,    40,    40,    42,    42,    42,
-      42,    42,    42,    43,    45,    47,    49,    49,    51,    51,
-      53,    53,    55,    57,    59,    59,    61,    61,    63,    63,
-      63,    63,    63,    63,    63,    63,    63,    63,    65,    67,
-      67,    69,    71,    71,    73,    75,    75,    77,    79,    81,
-      81,    83,    85,    87,    87,    89,    91,    93,    95,    95,
-      97,    97,    99,    99,    99,    99,    99,   101,   101,   101,
-     101,   101,   101,   103,   103,   103,   103,   104,   104,   104,
-     104,   104,   105,   105,   105,   105,   107,   107,   109,   109
+       0,    25,    25,    27,    30,    32,    32,    34,    34,    34,
+      36,    36,    38,    40,    40,    42,    42,    44,    44,    44,
+      44,    44,    44,    45,    47,    49,    51,    51,    53,    53,
+      55,    55,    57,    59,    61,    63,    65,    69,    73,    76,
+      76,    76,    76,    76,    76,    76,    76,    76,    78,    91,
+      94,    96,    98,    98,   100,   104,   104,   106,   108,   110,
+     110,   112,   114,   116,   116,   118,   120,   122,   126,   126,
+     128,   128,   130,   130,   130,   130,   130,   132,   132,   132,
+     132,   132,   132,   134,   134,   134,   134,   135,   135,   135,
+     135,   135,   136,   136,   137,   142,   144,   144,   146,   146
 };
 #endif
 
@@ -1448,22 +1460,90 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
-        case 2:
-#line 22 "sol.y" /* yacc.c:1646  */
-    {printf("Parsed  Successfull...\nCode is valid....\n\n"); 
-	return 0; }
-#line 1456 "y.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 3:
-#line 26 "sol.y" /* yacc.c:1646  */
+        case 3:
+#line 28 "sol.y" /* yacc.c:1646  */
     {	printf("hi declist");
 			}
-#line 1463 "y.tab.c" /* yacc.c:1646  */
+#line 1468 "y.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 34:
+#line 62 "sol.y" /* yacc.c:1646  */
+    {	printf("%s",(yyvsp[0].ptr)->code);
+		}
+#line 1475 "y.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 36:
+#line 66 "sol.y" /* yacc.c:1646  */
+    {	char * code=funadd3((yyvsp[-2].ptr)->code,"\n",(yyvsp[0].ptr)->code);
+			(yyval.ptr)=createnode(code, (yyvsp[-2].ptr)->st_ln, (yyvsp[-2].ptr)->no_ln+(yyvsp[0].ptr)->no_ln);
+		}
+#line 1483 "y.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 37:
+#line 70 "sol.y" /* yacc.c:1646  */
+    {	(yyval.ptr)=(yyvsp[0].ptr);
+		}
+#line 1490 "y.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 38:
+#line 74 "sol.y" /* yacc.c:1646  */
+    {	(yyval.ptr)=(yyvsp[0].ptr);
+	}
+#line 1497 "y.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 48:
+#line 79 "sol.y" /* yacc.c:1646  */
+    {	char *code;
+	if((yyval.ptr)->st_ln!=0)
+	{	code=funadd5((yyvsp[0].ptr)->code,"\n",in_tos(nd+(yyvsp[0].ptr)->st_ln+(yyvsp[0].ptr)->no_ln)," ",(yyvsp[-2].ptr)->code);
+		code=funadd3(code," = ",(yyvsp[0].ptr)->evar);
+	}
+	else
+	{	code=funadd5(in_tos(nd+(yyvsp[0].ptr)->st_ln+(yyvsp[0].ptr)->no_ln)," ",(yyvsp[-2].ptr)->code," = ",(yyvsp[0].ptr)->evar);
+	}
+	(yyval.ptr)=createnode(code,1,1+(yyvsp[0].ptr)->no_ln);
+	nd+=(yyvsp[0].ptr)->st_ln+(yyvsp[0].ptr)->no_ln;
+}
+#line 1513 "y.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 49:
+#line 92 "sol.y" /* yacc.c:1646  */
+    {	(yyval.ptr) = (yyvsp[0].ptr);
+	}
+#line 1520 "y.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 54:
+#line 101 "sol.y" /* yacc.c:1646  */
+    {	
+	}
+#line 1527 "y.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 67:
+#line 123 "sol.y" /* yacc.c:1646  */
+    {	(yyval.ptr)=yylval.ptr;
+	}
+#line 1534 "y.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 94:
+#line 138 "sol.y" /* yacc.c:1646  */
+    {	//printf("%s",yylval.ptr->code);
+	(yyval.ptr) = yylval.ptr;
+	(yyval.ptr)->evar=(yyval.ptr)->code;
+}
+#line 1543 "y.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 1467 "y.tab.c" /* yacc.c:1646  */
+#line 1547 "y.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1691,7 +1771,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 111 "sol.y" /* yacc.c:1906  */
+#line 148 "sol.y" /* yacc.c:1906  */
  
 
 #include "lex.yy.c" 
