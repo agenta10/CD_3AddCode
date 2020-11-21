@@ -1,58 +1,228 @@
-global
+%{
+	#include<stdio.h> 
+	#include "lex.yy.c"
+	//#include "requredfunc/str.h"
+	int error=1; 
+	void yyerror(const char *str);
+	int nd=0;
+	typedef struct cls
+	{	int node;
+		char *code;
+	} clss;
+%}
+%union {char * var;
+		char * str;
+		int int_const;
+		float float_const; 
+		clss * ptr;
+		}   
 
-	def
-		// some type defs
-		someId := product
-			pr1op[3], pr2op : someType;
-			otherProp123 :
-			otherId := product
-				extra, nul : null
-			end
-		end;
+%token AND ASSIGN COLON COMMA DEF DIV DOT ELSE END EQ EXITLOOP FLOAT  FORMAT FROM FUN GE GLOBAL GT IF INT  LEFT_PAREN LEFT_SQ_BKT LE LT MINUS MOD MULT NE NOT NUL OR PLUS PRINT PRODUCT READ RETURN RETURNS RIGHT_PAREN RIGHT_SQ_BKT SEMICOLON SKIP STEP  TO WHILE 
+ 
+%token<var> ID
+%token<str> STRING
+%token<int_const> INT_CONST		
+%token<float_const> FLOAT_CONST
 
-		var1[2], var2[2], var3[3] : float;
-		var4[1], v5[3][4] : int
-	end
+%left PLUS MINUS
+%left MULT DIV MOD
+%nonassoc UMINUS UPLUS 
+%nonassoc DOT
+%left AND OR
+%nonassoc NOT
+%start prog
 
-	fun myFunc -> int
-		print "# 123QWE"
-	end
+%% 
 
-	fun myFunc2
-		var1, var2[5], var3 : float;
-		var4[1], v5[3][4] : int
-		 -> int
-		print "# 123QWE"
-	end
+prog : GLOBAL declList stmtListO END 
+{printf("Parsed  Successfull...\nCode is valid....\n\n"); 
+	return 0; } ;
 
-	// Some comments in between
-	// int print scan
+declList: decl declList 
+			{	printf("hi declist");
+			}
+			| ;
 
-	while awe > qwe:
-		print "# 123QWE";
-		awe := qwe + 1;
-		qwe := qwe + 2
-	end;
+decl: DEF typeList END | FUN funDef END ;
 
-	if awe <> qwe or awe <> qwe or qwe + abc > 50 and not((abc  = 10.234) or  10.234  <= qwe and not qwe > 50) or qwe <> abc:
-		print "# 123QWE"
-	else
-		print "ABC";
-		print "ABC"
-	end;
+typeList: typeList SEMICOLON varList COLON type |varList COLON type |typeDef ;
 
-	from iteratorId := 5+abc to qwe-1.23 step abc+qwe :
-		print "ABC";
-		print "Looping"
-	end;
+varList: var COMMA varList|var;
 
-	exit;
-	return someExp1 mod someExp2;
+var: ID sizeListO ;
 
-	super.current.sub := (id1 : 1+2, 3-4, 5*6, 7/8, 9 mod 10, +1.-2, 4.567, (3), id2) ;
-	print "ABC";
-	read %f abc  + 10.234  mod qwe / 50;
+sizeListO: sizeList |  ;
 
-	read %s someID0 [id1 + id2][id3 - id4]
+sizeList: sizeList LEFT_SQ_BKT INT_CONST RIGHT_SQ_BKT |LEFT_SQ_BKT INT_CONST RIGHT_SQ_BKT ;
 
-end
+type: INT |FLOAT |STRING | NUL | typeDef |ID ;
+typeDef: ID ASSIGN PRODUCT typeList END ;
+
+funDef: funID fParamListO RETURNS type funBody ;
+
+funID: ID ;
+
+fParamListO: fParamList|   ;
+
+fParamList: fParamList SEMICOLON pList COLON type |pList COLON type;
+
+pList: pList COMMA idP |idP ;
+
+idP: ID sizeListO;
+
+funBody: declList stmtListO;
+
+stmtListO: stmtList|  ;
+
+stmtList: stmtList SEMICOLON stmt
+		 | stmt;
+
+stmt: assignmentStmt |readStmt |printStmt |ifStmt |whileStmt |loopStmt |callStmt |returnStmt |exitLoop |skip;
+
+assignmentStmt: dotId ASSIGN exp;
+
+dotId: id |id DOT dotId ;
+
+readStmt: READ FORMAT exp ;
+
+printStmt: PRINT STRING |PRINT FORMAT exp ;
+
+ifStmt: IF bExp COLON stmtList elsePart END ;
+
+elsePart: ELSE stmtList|  ;
+
+whileStmt: WHILE bExp COLON stmtList END ;
+
+loopStmt: FROM id ASSIGN exp TO exp stepPart COLON stmtListO END ;
+
+stepPart: STEP exp | ;
+
+callStmt: LEFT_PAREN ID COLON actParamList RIGHT_PAREN;
+
+returnStmt: RETURN expO;
+
+expO: exp |  ;
+
+exitLoop: EXITLOOP ;
+
+skip: SKIP ;
+
+id: ID indxListO ;
+
+indxListO: indxList | ;
+
+indxList: indxList LEFT_SQ_BKT exp RIGHT_SQ_BKT | LEFT_SQ_BKT exp RIGHT_SQ_BKT;
+
+bExp: bExp OR bExp  | bExp AND bExp  | NOT bExp  | LEFT_PAREN bExp RIGHT_PAREN | exp relOP exp;
+
+relOP: EQ |LE |LT |GE |GT |NE ;
+
+exp: exp PLUS exp | exp MINUS exp | exp MULT exp | exp DIV exp | 
+exp MOD exp | MINUS exp | PLUS exp | exp DOT exp | LEFT_PAREN exp RIGHT_PAREN 
+| id | LEFT_PAREN ID COLON actParamListO RIGHT_PAREN 
+| INT_CONST| FLOAT_CONST ;
+
+actParamListO: actParamList   | ;
+
+actParamList: actParamList COMMA exp | exp;
+
+%% 
+ 
+extern int yylex();
+extern int yyparse();
+extern int line_num;
+
+int main() 
+{ 
+	extern FILE *yyin;  
+	yyin = fopen("sampleInput/input3.txt","r");
+	yyparse(); 
+	if(error!=1) 
+		printf("\nInValid Program..!!!!\n\n"); 
+
+	return 0;
+} 
+
+void yyerror(const char *str) 
+{ 
+	fprintf(stderr, "Error at line %d: %s\n", yylineno, str);
+	error=0; 
+} 
+
+
+
+
+
+
+
+
+
+
+
+
+
+%{
+	#include<stdio.h>
+	#include<stdlib.h>
+	#include "y.tab.h" 
+	int line_num = 1;
+%}
+%option yylineno 
+
+%%
+[/][/].*["\n"] 	{}
+and {return AND;}
+:= { return ASSIGN;}
+: {return COLON;}
+, {return COMMA;}
+def {return DEF;}
+\/ {return DIV;}
+[.] {return DOT;}
+else {return ELSE;}
+end {return END;}
+= {return EQ;}
+exit {return EXITLOOP;}
+float {return FLOAT;}
+[0-9]+[.][0-9]+ {return FLOAT_CONST;}
+%[fsd] {return FORMAT;}
+from {return FROM;}
+fun {return FUN;}
+>= {return GE;}
+global {return GLOBAL;}
+> {return GT;}
+if {return IF;}
+int {return INT;}
+[0-9]+ {return INT_CONST;}
+[(] {return LEFT_PAREN;}
+\[ {return LEFT_SQ_BKT;}
+[<][=] {return LE;}
+[<] {return LT;}
+\- {return MINUS;}
+mod {return MOD; }
+\* {return MULT; } 
+[<][>] {return NE; }
+not {return NOT;}
+null {return NUL;}
+or {return OR;}
+\+ {return PLUS;}
+print {return PRINT;}
+product {return PRODUCT;}
+read {return READ;}
+return {return RETURN;}
+\-> {return RETURNS;}
+[)] {return RIGHT_PAREN;}
+\] {return RIGHT_SQ_BKT;}
+; {return SEMICOLON;}
+skip {return SKIP;}
+step {return STEP;}
+to {return TO;}
+while {return WHILE;}
+\".*\" {return STRING;}
+[a-zA-Z][a-zA-Z0-9]+ {return ID;}
+
+[\t\n" "] {}; 
+
+
+ 
+%%
+int yywrap() { return 1; }

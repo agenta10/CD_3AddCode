@@ -53,7 +53,3 @@ char * fl_tos(float num)
 		sprintf(d, "%f", num);
 		return d;	
 	}
-int main()
-{	char *d=FL_tos(52.3233);
-	printf("%s\n",d);
-}

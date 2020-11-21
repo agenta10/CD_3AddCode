@@ -1,0 +1,9 @@
+global 
+	ab := 0;
+	ac := 0;
+	if ab <> ac :
+		ab := 2
+	else 
+		ab := 3
+	end 
+end
