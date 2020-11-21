@@ -47,13 +47,107 @@ extern int yydebug;
   {
     AND = 258,
     ASSIGN = 259,
-    COLON = 260
+    COLON = 260,
+    COMMA = 261,
+    DEF = 262,
+    DIV = 263,
+    DOT = 264,
+    ELSE = 265,
+    END = 266,
+    EQ = 267,
+    EXITLOOP = 268,
+    FLOAT = 269,
+    FLOAT_CONST = 270,
+    FORMAT = 271,
+    FROM = 272,
+    FUN = 273,
+    GE = 274,
+    GLOBAL = 275,
+    GT = 276,
+    ID = 277,
+    IF = 278,
+    INT = 279,
+    INT_CONST = 280,
+    LEFT_PAREN = 281,
+    LEFT_SQ_BKT = 282,
+    LE = 283,
+    LT = 284,
+    MINUS = 285,
+    MOD = 286,
+    MULT = 287,
+    NE = 288,
+    NOT = 289,
+    NUL = 290,
+    OR = 291,
+    PLUS = 292,
+    PRINT = 293,
+    PRODUCT = 294,
+    READ = 295,
+    RETURN = 296,
+    RETURNS = 297,
+    RIGHT_PAREN = 298,
+    RIGHT_SQ_BKT = 299,
+    SEMICOLON = 300,
+    SKIP = 301,
+    STEP = 302,
+    STRING = 303,
+    TO = 304,
+    WHILE = 305,
+    UMINUS = 306,
+    UPLUS = 307
   };
 #endif
 /* Tokens.  */
 #define AND 258
 #define ASSIGN 259
 #define COLON 260
+#define COMMA 261
+#define DEF 262
+#define DIV 263
+#define DOT 264
+#define ELSE 265
+#define END 266
+#define EQ 267
+#define EXITLOOP 268
+#define FLOAT 269
+#define FLOAT_CONST 270
+#define FORMAT 271
+#define FROM 272
+#define FUN 273
+#define GE 274
+#define GLOBAL 275
+#define GT 276
+#define ID 277
+#define IF 278
+#define INT 279
+#define INT_CONST 280
+#define LEFT_PAREN 281
+#define LEFT_SQ_BKT 282
+#define LE 283
+#define LT 284
+#define MINUS 285
+#define MOD 286
+#define MULT 287
+#define NE 288
+#define NOT 289
+#define NUL 290
+#define OR 291
+#define PLUS 292
+#define PRINT 293
+#define PRODUCT 294
+#define READ 295
+#define RETURN 296
+#define RETURNS 297
+#define RIGHT_PAREN 298
+#define RIGHT_SQ_BKT 299
+#define SEMICOLON 300
+#define SKIP 301
+#define STEP 302
+#define STRING 303
+#define TO 304
+#define WHILE 305
+#define UMINUS 306
+#define UPLUS 307
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED

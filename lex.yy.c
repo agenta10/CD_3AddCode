@@ -547,7 +547,7 @@ char *yytext;
 	#include<stdio.h>
 	#include<stdlib.h>
 	#include "y.tab.h" 
-	extern int yylval; 
+	//extern int yylval; 
 	int line_num = 1;
 #line 553 "lex.yy.c"
 #line 554 "lex.yy.c"
