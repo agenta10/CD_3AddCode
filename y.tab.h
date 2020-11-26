@@ -154,7 +154,7 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 9 "sol.y" /* yacc.c:1909  */
+#line 10 "sol.y" /* yacc.c:1909  */
 clss *ptr;
 
 #line 161 "y.tab.h" /* yacc.c:1909  */

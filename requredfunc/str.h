@@ -6,6 +6,7 @@ typedef struct cls
 		char * evar;
 		char *code;
 	} clss;
+	
 char * funadd2(char b[],char c[])
 	{	int i,sz1=0,sz2=0;
 		for(i=0;b[i]!='\0';i++)
@@ -71,3 +72,21 @@ clss * createnode(char *a,int st,int nl)
 			x->code=a;
 			return x;
 		}
+clss *  expr2(clss * cl1 ,clss * cl2,char * op,int* nd,int *varc)
+	{	//printf("aaaaaaaa%d %daaaaaaaaaa\n",*nd,*varc);	
+		*(nd)=*(nd)+1;
+		*(varc)=*(varc)+1;
+		char *code;
+		code=funadd5(in_tos(*nd)," var",in_tos(*varc)," = ",cl1->evar);
+		code=funadd3(code,op,cl2->evar);
+		printf("%s\n",code);
+		clss *cc;
+		if(cl1->st_ln!=0)
+		{	cc=createnode(code,cl1->st_ln,cl1->no_ln+cl2->no_ln+1);}
+		else if(cl2->st_ln!=0)
+		{	cc=createnode(code,cl2->st_ln,cl1->no_ln+cl2->no_ln+1);}
+		else
+		{	cc=createnode(code,*nd,cl1->no_ln+cl2->no_ln+1);}
+		cc->evar=funadd2("var",in_tos(*varc));
+		return cc;
+	}

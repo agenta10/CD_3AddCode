@@ -4,13 +4,15 @@
 	#include "requredfunc/str.h"
 	int error=1; 
 	int nd=0;
+	int varc=0;
 	void yyerror(const char *str);
+	char * strs[1000];
 %}
 %union{clss *ptr;}
 
 %token AND ASSIGN COLON COMMA DEF DIV DOT ELSE END EQ EXITLOOP FLOAT FLOAT_CONST FORMAT FROM FUN GE GLOBAL GT ID IF INT INT_CONST LEFT_PAREN LEFT_SQ_BKT LE LT MINUS MOD MULT NE NOT NUL OR PLUS PRINT PRODUCT READ RETURN RETURNS RIGHT_PAREN RIGHT_SQ_BKT SEMICOLON SKIP STEP STRING TO WHILE 
 
-%type <ptr> exp id assignmentStmt dotId stmt stmtList stmtList0
+%type <ptr> exp id assignmentStmt dotId stmt stmtList stmtList0 bExp ifStmt elsePart
 
 %left PLUS MINUS
 %left MULT DIV MOD
@@ -59,11 +61,11 @@ idP: ID sizeListO;
 funBody: declList stmtListO;
 
 stmtListO: stmtList
-		{	printf("%s",$1->code);
+		{	printf("success");
 		}	|  ;
 
 stmtList: stmtList SEMICOLON stmt 
-		{	char * code=funadd3($1->code,"\n",$3->code);
+		{	char * code;
 			$$=createnode(code, $1->st_ln, $1->no_ln+$3->no_ln);
 		}		
 		| stmt
@@ -80,16 +82,13 @@ stmt: assignmentStmt
 
 assignmentStmt: dotId ASSIGN exp
 {	char *code;
-	printf("%d",nd);
-	if($$->st_ln!=0)
-	{	code=funadd5($3->code,"\n",in_tos(nd+$3->st_ln+$3->no_ln)," ",$1->code);
-		code=funadd3(code," = ",$3->evar);
-	}
+	nd++;
+	code=funadd5(in_tos(nd)," ",$1->code," = ",$3->evar);
+	printf("%s\n",code);
+	if($3->st_ln==0)
+		$$=createnode(code,nd,1+$3->no_ln);
 	else
-	{	code=funadd5(in_tos(nd+$3->st_ln+$3->no_ln+1)," ",$1->code," = ",$3->evar);
-	}
-	$$=createnode(code,1,1+$3->no_ln);
-	nd+=($3->no_ln+1);
+		$$=createnode(code,$3->st_ln,1+$3->no_ln);
 };
 
 dotId: id 
@@ -101,23 +100,22 @@ readStmt: READ FORMAT exp ;
 
 printStmt: PRINT STRING |PRINT FORMAT exp ;
 
-ifStmt: IF bExp COLON stmtList elsePart END 
-	{	char *code;
-	varc++;
-	if($3->st_ln!=0 && $1-st_ln!=0)	
-	{	code=funadd5($1->code,"\n",$3->code,"\n",in_tos(nd+$3->st_ln+$3->no_ln + $1->st_ln+$1->no_ln-1));
-		code=funadd5(code,"var",in_tos(varc),$1->evar," <> ");
-		code=funadd2(code,$3->evar);
-	}
-	else if($3->st_ln==0 && $3->st_ln==0)
-	{	code=funadd5(in_to(nd+1),"var",in_tos(varc),$1->evar," <> ");
-		code=funadd2(code,$3->evar);
-	}
-	$$=createnode(code,1,1+$3->no_ln);
-	nd+=$3->st_ln+$3->no_ln;
+ifStmt: IF bExp {nd++;} COLON stmtList {nd++;}elsePart END 
+	{	char * code=funadd5(in_tos($2->st_ln+$2->no_ln)," jmpn ",$2->evar," ",in_tos($7->st_ln));
+		printf("%s\n",code);
+		$$=createnode(code,$2->st_ln,$2->no_ln+$5->no_ln+$7->no_ln+1);
+		printf("%d goto %d\n",$5->st_ln+$5->no_ln,$7->st_ln+$7->no_ln);
+		//$$=createnode("",$2->st_ln,$2->no_ln+$5->no_ln+$6->no_ln+1);
 	};
 
-elsePart: ELSE stmtList|  ;
+elsePart: ELSE stmtList
+		{	$$=$2;
+			//printf("hi");
+		}
+		|
+		{	$$=createnode("",0,0);
+		}  
+		;
 
 whileStmt: WHILE bExp COLON stmtList END ;
 
@@ -137,6 +135,7 @@ skip: SKIP ;
 
 id: ID indxListO 
 	{	$$=yylval.ptr;
+		$$->evar=$$->code;
 	};
 
 indxListO: indxList | ;
@@ -144,15 +143,38 @@ indxListO: indxList | ;
 indxList: indxList LEFT_SQ_BKT exp RIGHT_SQ_BKT | LEFT_SQ_BKT exp RIGHT_SQ_BKT;
 
 bExp: bExp OR bExp  | bExp AND bExp  | NOT bExp  | LEFT_PAREN bExp RIGHT_PAREN | exp relOP exp
-{	
+{	char *code;
+	varc++;
+	nd++;
+	code=funadd5(in_tos(nd)," var",in_tos(varc)," = ",$1->evar);
+	code=funadd3(code," <> ",$3->evar);
+	printf("%s\n",code);
+	if($1->st_ln!=0)
+		$$=createnode(code,$1->st_ln,1+$1->no_ln+$3->no_ln);
+	else
+		$$=createnode(code,nd,1+$1->no_ln+$3->no_ln);
+	$$->evar=funadd2("var",in_tos(varc));
 }
 ;
 
 relOP: EQ |LE |LT |GE |GT |NE ;
 
-exp: exp PLUS exp | exp MINUS exp | exp MULT exp | exp DIV exp | 
-exp MOD exp | MINUS exp | PLUS exp | exp DOT exp | LEFT_PAREN exp RIGHT_PAREN 
-| id | LEFT_PAREN ID COLON actParamListO RIGHT_PAREN | 
+exp: exp PLUS exp 
+	{ $$=expr2($1 ,$3," + ",&nd,&varc);}
+	| exp MINUS exp
+	{ $$=expr2($1 ,$3," - ",&nd,&varc);} 
+	| exp MULT exp
+	{ $$=expr2($1 ,$3," * ",&nd,&varc);} 
+	| exp DIV exp
+	{ $$=expr2($1 ,$3," / ",&nd,&varc);} 
+	| exp MOD exp
+	{ $$=expr2($1 ,$3," % ",&nd,&varc);} 
+	| MINUS exp 
+	| PLUS exp | exp DOT exp | LEFT_PAREN exp RIGHT_PAREN
+	{ $$=$2;} 
+	| id
+	{ $$=$1;} 
+	| LEFT_PAREN ID COLON actParamListO RIGHT_PAREN | 
 INT_CONST
 {	//printf("%s",yylval.ptr->code);
 	$$ = yylval.ptr;
