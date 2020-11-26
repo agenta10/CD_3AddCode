@@ -1,9 +1,7 @@
 global 
 	ab := 0;
 	ac := 0;	
-	if ab <>ac :
-		ax := 2+2
-	else
-		ax := 1
+	while ab <> ac:
+		ax := 2+2*3
 	end
 end

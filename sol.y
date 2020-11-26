@@ -6,13 +6,12 @@
 	int nd=0;
 	int varc=0;
 	void yyerror(const char *str);
-	char * strs[1000];
 %}
 %union{clss *ptr;}
 
 %token AND ASSIGN COLON COMMA DEF DIV DOT ELSE END EQ EXITLOOP FLOAT FLOAT_CONST FORMAT FROM FUN GE GLOBAL GT ID IF INT INT_CONST LEFT_PAREN LEFT_SQ_BKT LE LT MINUS MOD MULT NE NOT NUL OR PLUS PRINT PRODUCT READ RETURN RETURNS RIGHT_PAREN RIGHT_SQ_BKT SEMICOLON SKIP STEP STRING TO WHILE 
 
-%type <ptr> exp id assignmentStmt dotId stmt stmtList stmtList0 bExp ifStmt elsePart
+%type <ptr> exp id assignmentStmt dotId stmt stmtList stmtList0 bExp ifStmt elsePart relOP EQ LE LT GE GT NE whileStmt
 
 %left PLUS MINUS
 %left MULT DIV MOD
@@ -61,7 +60,9 @@ idP: ID sizeListO;
 funBody: declList stmtListO;
 
 stmtListO: stmtList
-		{	printf("success");
+		{	//printf("%d\n",nd);
+			for(int i=1;i<=nd;i++)
+			{printf("%s\n",strs[i]);}
 		}	|  ;
 
 stmtList: stmtList SEMICOLON stmt 
@@ -78,13 +79,17 @@ stmt: assignmentStmt
 |readStmt |printStmt |ifStmt 
 	{	$$=$1;
 	}
-|whileStmt |loopStmt |callStmt |returnStmt |exitLoop |skip;
+|whileStmt
+	{	$$=$1;
+	} 
+|loopStmt |callStmt |returnStmt |exitLoop |skip;
 
 assignmentStmt: dotId ASSIGN exp
 {	char *code;
 	nd++;
 	code=funadd5(in_tos(nd)," ",$1->code," = ",$3->evar);
-	printf("%s\n",code);
+	//printf("%s\n",code);
+	strs[nd]=code;
 	if($3->st_ln==0)
 		$$=createnode(code,nd,1+$3->no_ln);
 	else
@@ -102,9 +107,10 @@ printStmt: PRINT STRING |PRINT FORMAT exp ;
 
 ifStmt: IF bExp {nd++;} COLON stmtList {nd++;}elsePart END 
 	{	char * code=funadd5(in_tos($2->st_ln+$2->no_ln)," jmpn ",$2->evar," ",in_tos($7->st_ln));
-		printf("%s\n",code);
-		$$=createnode(code,$2->st_ln,$2->no_ln+$5->no_ln+$7->no_ln+1);
-		printf("%d goto %d\n",$5->st_ln+$5->no_ln,$7->st_ln+$7->no_ln);
+		//printf("%s\n",code);
+		strs[$2->st_ln+$2->no_ln]=code;
+		$$=createnode(code,$2->st_ln,$2->no_ln+$5->no_ln+$7->no_ln+2);
+		strs[$5->st_ln+$5->no_ln]=funadd3(in_tos($5->st_ln+$5->no_ln)," goto ",in_tos($7->st_ln+$7->no_ln));
 		//$$=createnode("",$2->st_ln,$2->no_ln+$5->no_ln+$6->no_ln+1);
 	};
 
@@ -117,7 +123,14 @@ elsePart: ELSE stmtList
 		}  
 		;
 
-whileStmt: WHILE bExp COLON stmtList END ;
+whileStmt: WHILE bExp {nd++;}COLON stmtList END
+		{	char * code=funadd5(in_tos($2->st_ln+$2->no_ln)," jmpn ",$2->evar," ",in_tos($5->st_ln+$5->no_ln+1));
+			strs[$2->st_ln+$2->no_ln]=code;
+			nd++;
+			strs[nd]=funadd3(in_tos(nd)," goto ",in_tos($2->st_ln));
+			$$=createnode(code,$2->st_ln,$2->no_ln+$5->no_ln+2);
+		} 
+		;
 
 loopStmt: FROM id ASSIGN exp TO exp stepPart COLON stmtListO END ;
 
@@ -142,22 +155,16 @@ indxListO: indxList | ;
 
 indxList: indxList LEFT_SQ_BKT exp RIGHT_SQ_BKT | LEFT_SQ_BKT exp RIGHT_SQ_BKT;
 
-bExp: bExp OR bExp  | bExp AND bExp  | NOT bExp  | LEFT_PAREN bExp RIGHT_PAREN | exp relOP exp
-{	char *code;
-	varc++;
-	nd++;
-	code=funadd5(in_tos(nd)," var",in_tos(varc)," = ",$1->evar);
-	code=funadd3(code," <> ",$3->evar);
-	printf("%s\n",code);
-	if($1->st_ln!=0)
-		$$=createnode(code,$1->st_ln,1+$1->no_ln+$3->no_ln);
-	else
-		$$=createnode(code,nd,1+$1->no_ln+$3->no_ln);
-	$$->evar=funadd2("var",in_tos(varc));
+bExp: bExp OR bExp
+	{$$=expr2($1,$3,"or",&nd,&varc);} 
+ | bExp AND bExp  | NOT bExp  | LEFT_PAREN bExp RIGHT_PAREN | exp relOP exp
+{	$$=expr2($1,$3,$2->code,&nd,&varc);
 }
 ;
 
-relOP: EQ |LE |LT |GE |GT |NE ;
+relOP: EQ {$$ = createnode("=",0,0);} | LE{$$ = createnode("<=",0,0);} | LT {$$ = createnode("<",0,0);} 
+| GE {$$ = createnode(">=",0,0);} | GT {$$ = createnode(">",0,0);} 
+| NE {$$ = createnode("<>",0,0);} ;
 
 exp: exp PLUS exp 
 	{ $$=expr2($1 ,$3," + ",&nd,&varc);}

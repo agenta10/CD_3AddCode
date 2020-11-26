@@ -39,7 +39,7 @@ int {return INT;}
 \- {return MINUS;}
 mod {return MOD; }
 \* {return MULT; } 
-[<][>] {return NE; }
+[<][>] {yylval.ptr=createnode(funadd1(yytext),0,0);return NE; }
 not {return NOT;}
 null {return NUL;}
 or {return OR;}

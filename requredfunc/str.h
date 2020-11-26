@@ -1,5 +1,6 @@
 #include<stdio.h>
 #include<stdlib.h>
+char * strs[100];
 typedef struct cls
 	{	int st_ln;
 		int no_ln;
@@ -78,8 +79,9 @@ clss *  expr2(clss * cl1 ,clss * cl2,char * op,int* nd,int *varc)
 		*(varc)=*(varc)+1;
 		char *code;
 		code=funadd5(in_tos(*nd)," var",in_tos(*varc)," = ",cl1->evar);
-		code=funadd3(code,op,cl2->evar);
-		printf("%s\n",code);
+		code=funadd5(code," ",op," ",cl2->evar);
+		//printf("%s\n",code);
+		strs[*nd]=code;
 		clss *cc;
 		if(cl1->st_ln!=0)
 		{	cc=createnode(code,cl1->st_ln,cl1->no_ln+cl2->no_ln+1);}
@@ -88,5 +90,6 @@ clss *  expr2(clss * cl1 ,clss * cl2,char * op,int* nd,int *varc)
 		else
 		{	cc=createnode(code,*nd,cl1->no_ln+cl2->no_ln+1);}
 		cc->evar=funadd2("var",in_tos(*varc));
+	
 		return cc;
 	}
